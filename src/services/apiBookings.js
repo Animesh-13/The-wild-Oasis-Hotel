@@ -1,16 +1,18 @@
+import { PAGE_SIZE } from "../utils/constants";
 import { getToday } from "../utils/helpers";
 import supabase from "./supabase";
 
-export async function getBookings({ filter, sortBy }) {
+export async function getBookings({ filter, sortBy, page }) {
   let query = supabase
     .from("bookings")
     .select(
-      "id,created_at,startDate,endDate,numNights,numGuests,status,totalPrice, cabins(name), guests(fullName,email)"
+      "id,created_at,startDate,endDate,numNights,numGuests,status,totalPrice, cabins(name), guests(fullName,email)",
+      { count: "exact" }
     );
 
   // Filter
   if (filter) query = query[filter.method || "eq"](filter.field, filter.value);
-  const { data, error } = await query;
+  const { data, error, count } = await query;
 
   // SortBy  I have to see this BigDoubt
   if (sortBy)
@@ -18,12 +20,20 @@ export async function getBookings({ filter, sortBy }) {
       ascending: sortBy.direction === "asc",
     });
 
+  console.log(`This is page no. ${page}`);
+
+  if (page) {
+    const from = (page - 1) * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+    query = query.range(from, to);
+  }
+
   if (error) {
     console.error(error);
     throw new Error("Booking could not be loaded");
   }
 
-  return data;
+  return { data, count };
 }
 export async function getBooking(id) {
   const { data, error } = await supabase
