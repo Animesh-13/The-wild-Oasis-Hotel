@@ -12,7 +12,6 @@ export async function getBookings({ filter, sortBy, page }) {
 
   // Filter
   if (filter) query = query[filter.method || "eq"](filter.field, filter.value);
-  const { data, error, count } = await query;
 
   // SortBy  I have to see this BigDoubt
   if (sortBy)
@@ -27,6 +26,7 @@ export async function getBookings({ filter, sortBy, page }) {
     const to = from + PAGE_SIZE - 1;
     query = query.range(from, to);
   }
+  const { data, error, count } = await query;
 
   if (error) {
     console.error(error);
