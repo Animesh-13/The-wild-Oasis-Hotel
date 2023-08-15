@@ -7,7 +7,6 @@ import { useSettings } from "./useSettings";
 function UpdateSettingsForm() {
   const {
     isLoading,
-    error,
     settings: {
       minBookingLength,
       maxBookingLength,
